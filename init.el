@@ -15,7 +15,16 @@
 (eval-when-compile
   (require 'use-package))
 
+;; Keys
+(global-set-key(kbd "<C-z>") nil)
+
+;; System
+(setq backup-directory-alist `(("." . "~/.emacs.d/backups")))
+(setq auto-save-file-name-transforms `((".*" "~/.emacs.d/autosaves" t)))
+(setq create-lockfiles nil)
+
 ;; UI
+(setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
@@ -59,8 +68,6 @@
   ;; use our derived mode to map both .tsx AND .ts -> typescriptreact-mode -> treesitter tsx
   (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
 
-;; auto-format different source code files extremely intelligently
-;; https://github.com/radian-software/apheleia
 (use-package apheleia
   :ensure t
   :config
@@ -74,45 +81,36 @@
   (setq company-tooltip-align-annotations t))
 
 ;; Linting
-(use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode))
+(use-package flymake
+  :custom
+  (flymake-fringe-indicator-position nil))
+
+(use-package flymake-eslint
+  :preface
+  (defun me/flymake-eslint-enable-maybe ()
+    (when-let* ((root (locate-dominating-file (buffer-file-name) "package.json"))
+                (rc (locate-file ".eslintrc" (list root) '(".js" ".json"))))
+      (make-local-variable 'exec-path)
+      (push (file-name-concat root "node_modules" ".bin") exec-path)
+      (flymake-eslint-enable))))
 
 ;; Prettier
-(use-package prettier-js
-  :ensure t
-  :hook ((js2-mode . prettier-js-mode)
-         (web-mode . prettier-js-mode))
-  :config
-  (setq prettier-js-args '("--tab-width" "2"
-                           "--single-quote"
-                           "--trailing-comma" "all"
-                           "--no-semi")))
+(use-package prettier
+  :ensure t)
 
 ;; Navigation
 (use-package projectile
   :ensure t
   :config
-  (projectile-mode +1)
+  (setq projectile-indexing-method 'native)
+  (setq projectile-sort-order 'recentf)
   (setq projectile-completion-system 'ivy)
-  (define key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+  (setq projectile-project-search-path '("~/workspace/"))
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 
 (use-package ivy
   :ensure t
   :diminish
-  :bind (("C-s" . swiper)
-	 :map ivy-minibuffer-map
-	 ("TAB" . ivy-alt-done)
-	 ("C-l" . ivy-alt-done)
-	 ("C-j" . ivy-next-line)
-	 ("C-k" . ivy-previous-line)
-	 :map ivy-switch-buffer-map
-	 ("C-k" . ivy-previous-line)
-	 ("C-l" . ivy-done)
-	 ("C-d" . ivy-switch-buffer-kill)
-	 :map ivy-reverse-i-search-map
-	 ("C-k" . ivy-previous-line)
-	 ("C-d" . ivy-reverse-i-search-kill))
   :config
   (ivy-mode 1))
 
@@ -126,6 +124,28 @@
 
 ;; LSP
 (use-package eglot
+  ;; :straight nil
+  :custom
+  (eglot-autoshutdown t)
+  :hook
+  (eglot-managed-mode . me/flymake-eslint-enable-maybe)
+  (typescript-ts-base-mode . eglot-ensure)
+  :init
+  (put 'eglot-server-programs 'safe-local-variable 'listp)
+  :config
+  ;; (add-to-list 'eglot-stay-out-of 'eldoc-documentation-strategy)
+  ;; (put 'eglot-error 'flymake-overlay-control nil)
+  ;; (put 'eglot-warning 'flymake-overlay-control nil)
+  (setq eglot-confirm-server-initiated-edits nil)
+  (advice-add 'eglot--apply-workspace-edit :after #'me/project-save)
+  (advice-add 'project-kill-buffers :before #'me/eglot-shutdown-project)
+  :preface
+  (defun me/eglot-shutdown-project ()
+    "Kill the LSP server for the current project if it exists."
+    (when-let ((server (eglot-current-server)))
+      (ignore-errors (eglot-shutdown server)))))
+
+(use-package eglot
   :ensure t)
 
 ;; Git
@@ -136,8 +156,9 @@
   (add-to-list 'eglot-server-programs
                '(typescript-mode . ("typescript-language-server" "--stdio"))))
 
- (add-hook 'typescript-mode-hook 'eglot-ensure)
-
+(add-hook 'typescript-mode-hook 'eglot-ensure)
+(add-hook 'typescript-mode-hook 'flymake-eslint-enable)
+(add-hook 'typescript-mode-hook 'prettier-mode)
 
 (provide 'init)
 (custom-set-variables
@@ -146,7 +167,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(ivy projectile apheleia tree-sitter-langs tree-sitter catppuccin-theme prettier-js flycheck web-mode rjsx-mode use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm elixir-mode eglot doom-themes company-quickhelp)))
+   '(flymake-eslint ivy projectile apheleia tree-sitter-langs tree-sitter catppuccin-theme prettier-js flycheck web-mode rjsx-mode use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm elixir-mode eglot doom-themes company-quickhelp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
