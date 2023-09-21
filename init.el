@@ -128,6 +128,10 @@
 (use-package eglot
   :ensure t)
 
+;; Git
+(use-package magit
+  :ensure t)
+
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
                '(typescript-mode . ("typescript-language-server" "--stdio"))))
