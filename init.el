@@ -92,15 +92,29 @@
 ;; Navigation
 (use-package projectile
   :ensure t
-  :init (projectile-mode +1)
-  :bind-keymap
-  ("C-c p" . projectile-command-map)
   :config
-  (setq
-        projectile-require-project-root nil))
+  (projectile-mode +1)
+  (setq projectile-completion-system 'ivy)
+  (define key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+
 (use-package ivy
-  :ensure
-  )
+  :ensure t
+  :diminish
+  :bind (("C-s" . swiper)
+	 :map ivy-minibuffer-map
+	 ("TAB" . ivy-alt-done)
+	 ("C-l" . ivy-alt-done)
+	 ("C-j" . ivy-next-line)
+	 ("C-k" . ivy-previous-line)
+	 :map ivy-switch-buffer-map
+	 ("C-k" . ivy-previous-line)
+	 ("C-l" . ivy-done)
+	 ("C-d" . ivy-switch-buffer-kill)
+	 :map ivy-reverse-i-search-map
+	 ("C-k" . ivy-previous-line)
+	 ("C-d" . ivy-reverse-i-search-kill))
+  :config
+  (ivy-mode 1))
 
 ;; Terminal
 (use-package vterm
