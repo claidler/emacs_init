@@ -31,47 +31,18 @@
 (scroll-bar-mode -1)
 
 ;; Treesitter
-(use-package tree-sitter
-  :ensure t
-  :config
-  ;; activate tree-sitter on any buffer containing code for which it has a parser available
-  (global-tree-sitter-mode)
-  ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
-  ;; by switching on and off
-  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
 
-(use-package tree-sitter-langs
-  :ensure t
-  :after tree-sitter)
+;; FIRST: git clone https://github.com/casouri/tree-sitter-module
+;;        bash batch.sh
+;; THEN : sudo cp dist/* /usr/local/lib
+;; FINALLY:
+(setq treesit-extra-load-path '("/usr/local/lib"))
+(setq treesit-font-lock-level 4)
 
 ;; Theme
 (use-package catppuccin-theme
   :ensure t)
 (load-theme 'catppuccin :no-confirm)
-
-;; JavaScript and TypeScript
-(use-package rjsx-mode
-  :ensure t
-  :mode ("\\.js\\'" . rjsx-mode))
-
-(use-package typescript-mode
-  :after tree-sitter
-  :config
-  ;; we choose this instead of tsx-mode so that eglot can automatically figure out language for server
-  ;; see https://github.com/joaotavora/eglot/issues/624 and https://github.com/joaotavora/eglot#handling-quirky-servers
-  (define-derived-mode typescriptreact-mode typescript-mode
-    "TypeScript TSX")
-
-  ;; use our derived mode for tsx files
-  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
-  ;; by default, typescript-mode is mapped to the treesitter typescript parser
-  ;; use our derived mode to map both .tsx AND .ts -> typescriptreact-mode -> treesitter tsx
-  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
-
-(use-package apheleia
-  :ensure t
-  :config
-  (apheleia-global-mode +1))
 
 ;; Auto-completion
 (use-package company
@@ -86,28 +57,13 @@
   (flymake-fringe-indicator-position nil))
 
 (use-package flymake-eslint
-  :preface
-  (defun me/flymake-eslint-enable-maybe ()
-    (when-let* ((root (locate-dominating-file (buffer-file-name) "package.json"))
-                (rc (locate-file ".eslintrc" (list root) '(".js" ".json"))))
-      (make-local-variable 'exec-path)
-      (push (file-name-concat root "node_modules" ".bin") exec-path)
-      (flymake-eslint-enable))))
+  :ensure t)
 
 ;; Prettier
 (use-package prettier
   :ensure t)
 
 ;; Navigation
-(use-package projectile
-  :ensure t
-  :config
-  (setq projectile-indexing-method 'native)
-  (setq projectile-sort-order 'recentf)
-  (setq projectile-completion-system 'ivy)
-  (setq projectile-project-search-path '("~/workspace/"))
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
-
 (use-package ivy
   :ensure t
   :diminish
@@ -122,43 +78,9 @@
 (use-package gptel
   :ensure t)
 
-;; LSP
-(use-package eglot
-  ;; :straight nil
-  :custom
-  (eglot-autoshutdown t)
-  :hook
-  (eglot-managed-mode . me/flymake-eslint-enable-maybe)
-  (typescript-ts-base-mode . eglot-ensure)
-  :init
-  (put 'eglot-server-programs 'safe-local-variable 'listp)
-  :config
-  ;; (add-to-list 'eglot-stay-out-of 'eldoc-documentation-strategy)
-  ;; (put 'eglot-error 'flymake-overlay-control nil)
-  ;; (put 'eglot-warning 'flymake-overlay-control nil)
-  (setq eglot-confirm-server-initiated-edits nil)
-  (advice-add 'eglot--apply-workspace-edit :after #'me/project-save)
-  (advice-add 'project-kill-buffers :before #'me/eglot-shutdown-project)
-  :preface
-  (defun me/eglot-shutdown-project ()
-    "Kill the LSP server for the current project if it exists."
-    (when-let ((server (eglot-current-server)))
-      (ignore-errors (eglot-shutdown server)))))
-
-(use-package eglot
-  :ensure t)
-
 ;; Git
 (use-package magit
   :ensure t)
-
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(typescript-mode . ("typescript-language-server" "--stdio"))))
-
-(add-hook 'typescript-mode-hook 'eglot-ensure)
-(add-hook 'typescript-mode-hook 'flymake-eslint-enable)
-(add-hook 'typescript-mode-hook 'prettier-mode)
 
 (provide 'init)
 (custom-set-variables
@@ -166,8 +88,11 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("6ca663019600e8e5233bf501c014aa0ec96f94da44124ca7b06d3cf32d6c5e06" "f5f80dd6588e59cfc3ce2f11568ff8296717a938edd448a947f9823a4e282b66" "da75eceab6bea9298e04ce5b4b07349f8c02da305734f7c0c8c6af7b5eaa9738" default))
+ '(global-font-lock-mode t)
  '(package-selected-packages
-   '(flymake-eslint ivy projectile apheleia tree-sitter-langs tree-sitter catppuccin-theme prettier-js flycheck web-mode rjsx-mode use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm elixir-mode eglot doom-themes company-quickhelp)))
+   '(doom-themes flymake-eslint ivy catppuccin-theme use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm eglot company-quickhelp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
