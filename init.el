@@ -52,12 +52,14 @@
   (setq company-tooltip-align-annotations t))
 
 ;; Linting
-(use-package flymake
-  :custom
-  (flymake-fringe-indicator-position nil))
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
 
-(use-package flymake-eslint
-  :ensure t)
+;; LSP
+(use-package lsp-mode
+  :ensure t
+  :init)
 
 ;; Prettier
 (use-package prettier
@@ -77,10 +79,23 @@
 ;; GPT
 (use-package gptel
   :ensure t)
+(setq gptel-directives '((ProgChat . "You are a programmer. Do not be chatty. Give concise answers. If you can answer with only code, please do. Use step by step if required for complex logic.")))
+(setq gptel-temperature 0)
+(setq gptel--num-messages-to-send 0)
+(setq gptel-model "gpt-4")
 
-;; Git
+;; GIT
 (use-package magit
   :ensure t)
+
+;; Coding
+(defun setup-coding-mode ()
+  (lsp)
+  (prettier-mode))
+
+(add-hook 'tsx-ts-mode-hook 'setup-coding-mode)
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 
 (provide 'init)
 (custom-set-variables
@@ -91,8 +106,10 @@
  '(custom-safe-themes
    '("6ca663019600e8e5233bf501c014aa0ec96f94da44124ca7b06d3cf32d6c5e06" "f5f80dd6588e59cfc3ce2f11568ff8296717a938edd448a947f9823a4e282b66" "da75eceab6bea9298e04ce5b4b07349f8c02da305734f7c0c8c6af7b5eaa9738" default))
  '(global-font-lock-mode t)
+ '(gptel-model "gpt-4")
+ '(gptel-temperature 0.0)
  '(package-selected-packages
-   '(doom-themes flymake-eslint ivy catppuccin-theme use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm eglot company-quickhelp)))
+   '(lsp-mode doom-themes flymake-eslint ivy catppuccin-theme use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm eglot company-quickhelp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
