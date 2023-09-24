@@ -4,7 +4,8 @@
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
-                         ("gnu" . "https://elpa.gnu.org/packages/")))
+                         ("gnu" . "https://elpa.gnu.org/packages/")
+			 ("gnu-devel" . "https://elpa.gnu.org/devel/")))
 (package-initialize)
 
 ;; Bootstrap 'use-package'
@@ -29,6 +30,10 @@
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
 
 ;; Treesitter
 
@@ -51,15 +56,8 @@
   :config
   (setq company-tooltip-align-annotations t))
 
-;; Linting
-(use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode))
-
 ;; LSP
-(use-package lsp-mode
-  :ensure t
-  :init)
+(setq eglot-events-buffer-size 0)
 
 ;; Prettier
 (use-package prettier
@@ -79,10 +77,14 @@
 ;; GPT
 (use-package gptel
   :ensure t)
-(setq gptel-directives '((ProgChat . "You are a programmer. Do not be chatty. Give concise answers. If you can answer with only code, please do. Use step by step if required for complex logic.")))
-(setq gptel-temperature 0)
-(setq gptel--num-messages-to-send 0)
+(setq gptel-directives '((ProgChat . "You are a programmer. Do not be chatty. Give concise answers. Answer with just code, if possible. Use step by step if required for complex logic, but try to avoid it.")))
 (setq gptel-model "gpt-4")
+
+;; gptel extensions
+;; mkdir ~/.emacs.d/extensions
+;; git clone git@github.com:kamushadenes/gptel-extensions.el.git
+(add-to-list 'load-path "./extensions/gptel-extensions.el")
+(require 'gptel-extensions)
 
 ;; GIT
 (use-package magit
@@ -90,7 +92,7 @@
 
 ;; Coding
 (defun setup-coding-mode ()
-  (lsp)
+  (eglot-ensure)
   (prettier-mode))
 
 (add-hook 'tsx-ts-mode-hook 'setup-coding-mode)
