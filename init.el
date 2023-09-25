@@ -16,6 +16,11 @@
 (eval-when-compile
   (require 'use-package))
 
+(add-to-list 'load-path "~/.emacs.d/extensions")
+(use-package quelpa
+  :ensure t)
+
+
 ;; Keys
 (global-set-key(kbd "<C-z>") nil)
 
@@ -59,9 +64,10 @@
 ;; LSP
 (setq eglot-events-buffer-size 0)
 
-;; Prettier
+;; Format
 (use-package prettier
   :ensure t)
+(quelpa '(flymake-eslint :fetcher git :url "https://github.com/hochata/flymake-eslint"))
 
 ;; Navigation
 (use-package ivy
@@ -80,11 +86,8 @@
 (setq gptel-directives '((ProgChat . "You are a programmer. Do not be chatty. Give concise answers. Answer with just code, if possible. Use step by step if required for complex logic, but try to avoid it.")))
 (setq gptel-model "gpt-4")
 
-;; gptel extensions
-;; mkdir ~/.emacs.d/extensions
-;; git clone git@github.com:kamushadenes/gptel-extensions.el.git
-(add-to-list 'load-path "./extensions/gptel-extensions.el")
-(require 'gptel-extensions)
+(quelpa '(gptel-extensions :fetcher git :url "git@github.com:kamushadenes/gptel-extensions.el.git"))
+
 
 ;; GIT
 (use-package magit
