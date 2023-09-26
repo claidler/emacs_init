@@ -67,7 +67,9 @@
 ;; Format
 (use-package prettier
   :ensure t)
-(quelpa '(flymake-eslint :fetcher git :url "https://github.com/hochata/flymake-eslint"))
+(use-package flymake-eslint
+  :ensure t)
+(setq flymake-eslint-executable-name "eslint_d")
 
 ;; Navigation
 (use-package ivy
@@ -83,7 +85,7 @@
 ;; GPT
 (use-package gptel
   :ensure t)
-(setq gptel-directives '((ProgChat . "You are a programmer. Do not be chatty. Give concise answers. Answer with just code, if possible. Use step by step if required for complex logic, but try to avoid it.")))
+(setq gptel-directives '((ProgChat . "You are a programmer. Do not be chatty. Give concise answers. Answer with just code if possible. Only use step by step if required for complex calculations - try to avoid it.")))
 (setq gptel-model "gpt-4")
 
 (quelpa '(gptel-extensions :fetcher git :url "git@github.com:kamushadenes/gptel-extensions.el.git"))
@@ -99,6 +101,9 @@
   (prettier-mode))
 
 (add-hook 'tsx-ts-mode-hook 'setup-coding-mode)
+(add-hook 'typescript-mode-hook 'setup-coding-mode)
+(add-hook 'eglot-managed-mode-hook (lambda ()
+				     (flymake-eslint-enable)))
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 
