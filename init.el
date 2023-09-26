@@ -70,6 +70,8 @@
 (use-package flymake-eslint
   :ensure t)
 (setq flymake-eslint-executable-name "eslint_d")
+(use-package flycheck
+  :ensure t)
 
 ;; Navigation
 (use-package ivy
@@ -88,7 +90,29 @@
 (setq gptel-directives '((ProgChat . "You are a programmer. Do not be chatty. Give concise answers. Answer with just code if possible. Only use step by step if required for complex calculations - try to avoid it.")))
 (setq gptel-model "gpt-4")
 
+(defvar gptel-quick--history nil)
+(defun gptel-quick (prompt)
+  (interactive (list (read-string "Ask ChatGPT: " nil gptel-quick--history)))
+  (when (string= prompt "") (user-error "A prompt is required."))
+  (gptel-request
+   prompt
+   :callback
+   (lambda (response info)
+     (if (not response)
+         (message "gptel-quick failed with message: %s" (plist-get info :status))
+       (with-current-buffer (get-buffer-create "*gptel-quick*")
+         (let ((inhibit-read-only t))
+           (erase-buffer)
+           (insert response))
+         (special-mode)
+         (display-buffer (current-buffer)
+                         `((display-buffer-in-side-window)
+                           (side . bottom)
+                           (window-height . ,#'fit-window-to-buffer))))))))
+
+
 (quelpa '(gptel-extensions :fetcher git :url "git@github.com:kamushadenes/gptel-extensions.el.git"))
+(global-set-key (kbd "C-c g") 'gptel)
 
 
 ;; GIT
@@ -99,13 +123,25 @@
 (defun setup-coding-mode ()
   (eglot-ensure)
   (prettier-mode))
+(defun setup-css-mode ()
+  (eglot-ensure)
+  (flycheck-mode))
 
 (add-hook 'tsx-ts-mode-hook 'setup-coding-mode)
 (add-hook 'typescript-mode-hook 'setup-coding-mode)
+(add-hook 'css-ts-mode-hook 'setup-css-mode)
 (add-hook 'eglot-managed-mode-hook (lambda ()
-				     (flymake-eslint-enable)))
+                                     (cond
+                                      ((or (eq major-mode 'typescript-mode)
+                                           (eq major-mode 'tsx-ts-mode))
+                                       (flymake-eslint-enable))
+                                      ((eq major-mode 'css-ts-mode)
+                                       (flymake-mode -1)))))
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.css\\'" . css-ts-mode))
+
+
 
 (provide 'init)
 (custom-set-variables
@@ -119,7 +155,7 @@
  '(gptel-model "gpt-4")
  '(gptel-temperature 0.0)
  '(package-selected-packages
-   '(lsp-mode doom-themes flymake-eslint ivy catppuccin-theme use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm eglot company-quickhelp)))
+   '(flymake-css lsp-mode doom-themes flymake-eslint ivy catppuccin-theme use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm eglot company-quickhelp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
