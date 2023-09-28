@@ -39,6 +39,8 @@
   :ensure t
   :config
   (which-key-mode))
+;; dired-style buffer menu
+(global-set-key (kbd "C-x C-b") 'ibuffer)
 
 ;; Treesitter
 
@@ -120,7 +122,7 @@
   (flycheck-mode))
 
 (add-hook 'tsx-ts-mode-hook 'setup-coding-mode)
-(add-hook 'typescript-mode-hook 'setup-coding-mode)
+(add-hook 'typescript-ts-mode-hook 'setup-coding-mode)
 (add-hook 'css-ts-mode-hook 'setup-css-mode)
 (add-hook 'eglot-managed-mode-hook (lambda ()
                                      (cond
