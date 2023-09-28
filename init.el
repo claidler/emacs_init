@@ -41,6 +41,8 @@
   (which-key-mode))
 ;; dired-style buffer menu
 (global-set-key (kbd "C-x C-b") 'ibuffer)
+;;font
+(set-face-attribute 'default nil :font "JetBrains Mono-13")
 
 ;; Treesitter
 
