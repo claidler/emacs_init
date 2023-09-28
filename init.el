@@ -73,6 +73,11 @@
 (use-package flycheck
   :ensure t)
 
+;; Editing
+(use-package expand-region
+  :ensure t)
+(global-set-key (kbd "C-=") 'er/expand-region)
+
 ;; Navigation
 (use-package ivy
   :ensure t
@@ -87,33 +92,20 @@
 ;; GPT
 (use-package gptel
   :ensure t)
-(setq gptel-directives '((ProgChat . "You are a programmer. Do not be chatty. Give concise answers. Answer with just code if possible. Only use step by step if required for complex calculations - try to avoid it.")))
+(setq gptel-directives '((default . "You are a programmer. Do not be chatty. Give concise answers. Answer with just code if possible. Only use step by step if required for complex calculations - try to avoid it.")))
 (setq gptel-model "gpt-4")
+(defun gptel-open-and-clear ()
+  (interactive)
+  (let ((gptel-buffer (call-interactively 'gptel)))
+    (with-current-buffer gptel-buffer
+      (delete-region (point-min) (point-max)))))
 
-(defvar gptel-quick--history nil)
-(defun gptel-quick (prompt)
-  (interactive (list (read-string "Ask ChatGPT: " nil gptel-quick--history)))
-  (when (string= prompt "") (user-error "A prompt is required."))
-  (gptel-request
-   prompt
-   :callback
-   (lambda (response info)
-     (if (not response)
-         (message "gptel-quick failed with message: %s" (plist-get info :status))
-       (with-current-buffer (get-buffer-create "*gptel-quick*")
-         (let ((inhibit-read-only t))
-           (erase-buffer)
-           (insert response))
-         (special-mode)
-         (display-buffer (current-buffer)
-                         `((display-buffer-in-side-window)
-                           (side . bottom)
-                           (window-height . ,#'fit-window-to-buffer))))))))
+(global-set-key (kbd "C-c l") 'gptel)
+(global-set-key (kbd "C-c L") 'gptel-open-and-clear)
+(global-set-key (kbd "C-c k") 'curser-code-replace)
 
-
-(quelpa '(gptel-extensions :fetcher git :url "git@github.com:kamushadenes/gptel-extensions.el.git"))
-(global-set-key (kbd "C-c g") 'gptel)
-
+;; git clone git@github.com:claidler/curser-el.git
+(load-file "~/.emacs.d/extensions/curser-el/curser.el")
 
 ;; GIT
 (use-package magit
@@ -155,7 +147,7 @@
  '(gptel-model "gpt-4")
  '(gptel-temperature 0.0)
  '(package-selected-packages
-   '(flymake-css lsp-mode doom-themes flymake-eslint ivy catppuccin-theme use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm eglot company-quickhelp)))
+   '(expand-region flymake-css lsp-mode doom-themes flymake-eslint ivy catppuccin-theme use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm eglot company-quickhelp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
