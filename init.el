@@ -12,17 +12,19 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-
 (eval-when-compile
   (require 'use-package))
 
 (add-to-list 'load-path "~/.emacs.d/extensions")
 (use-package quelpa
   :ensure t)
-
+(use-package quelpa-use-package
+  :ensure t)
 
 ;; Keys
 (global-set-key(kbd "<C-z>") nil)
+;; (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+;; (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
 
 ;; System
 (setq backup-directory-alist `(("." . "~/.emacs.d/backups")))
@@ -42,7 +44,16 @@
 ;; dired-style buffer menu
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 ;;font
-(set-face-attribute 'default nil :font "JetBrains Mono-13")
+(set-face-attribute 'default nil :font "JetBrains Mono:pixelsize=13")
+(setq-default line-spacing 2)
+;;minibuffer
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(help-key-binding ((t (:inherit fixed-pitch :background "grey19" :foreground "DeepSkyBlue1" :box (:line-width (-1 . -1) :color "grey35")))))
+ '(highlight ((t (:background "dark orange" :foreground "black")))))
 
 ;; Treesitter
 
@@ -58,13 +69,6 @@
   :ensure t)
 (load-theme 'catppuccin :no-confirm)
 
-;; Auto-completion
-(use-package company
-  :ensure t
-  :init (global-company-mode)
-  :config
-  (setq company-tooltip-align-annotations t))
-
 ;; LSP
 (setq eglot-events-buffer-size 0)
 
@@ -78,16 +82,12 @@
   :ensure t)
 
 ;; Editing
-(use-package expand-region
-  :ensure t)
-(global-set-key (kbd "C-=") 'er/expand-region)
+(quelpa '(combobulate :fetcher github-ssh :repo "mickeynp/combobulate"))
+(setq combobulate-key-prefix "C-c o")
+
 
 ;; Navigation
-(use-package ivy
-  :ensure t
-  :diminish
-  :config
-  (ivy-mode 1))
+(fido-vertical-mode 1)
 
 ;; Terminal
 (use-package vterm
@@ -114,13 +114,26 @@
 ;; GIT
 (use-package magit
   :ensure t)
+(quelpa '(code-review :fetcher github-ssh :repo "phelrine/code-review" :branch "fix/closql-update"))
+(use-package copilot
+  :quelpa (copilot :fetcher github
+                   :repo "zerolfx/copilot.el"
+                   :branch "main"
+                   :files ("dist" "*.el")
+		   ))
+(define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+
+(add-hook 'prog-mode-hook 'copilot-mode)
 
 ;; Coding
 (defun setup-coding-mode ()
   (eglot-ensure)
+  (combobulate-mode)
   (prettier-mode))
 (defun setup-css-mode ()
   (eglot-ensure)
+  (combobulate-mode)
   (flycheck-mode))
 
 (add-hook 'tsx-ts-mode-hook 'setup-coding-mode)
@@ -151,10 +164,5 @@
  '(gptel-model "gpt-4")
  '(gptel-temperature 0.0)
  '(package-selected-packages
-   '(expand-region flymake-css lsp-mode doom-themes flymake-eslint ivy catppuccin-theme use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm eglot company-quickhelp)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+   '(code-review emojify forge yaml deferred uuidgen ghub treepy a closql emacsql combobulate quelpa-use-package kaolin-themes cyberpunk-theme expand-region flymake-css lsp-mode doom-themes flymake-eslint ivy catppuccin-theme use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm eglot company-quickhelp)))
+
