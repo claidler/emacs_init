@@ -53,7 +53,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(help-key-binding ((t (:inherit fixed-pitch :background "grey19" :foreground "DeepSkyBlue1" :box (:line-width (-1 . -1) :color "grey35")))))
- '(highlight ((t (:background "dark orange" :foreground "black")))))
+ '(highlight ((t (:background "#ff392e" :foreground "white")))))
 
 ;; Treesitter
 
@@ -164,5 +164,5 @@
  '(gptel-model "gpt-4")
  '(gptel-temperature 0.0)
  '(package-selected-packages
-   '(code-review emojify forge yaml deferred uuidgen ghub treepy a closql emacsql combobulate quelpa-use-package kaolin-themes cyberpunk-theme expand-region flymake-css lsp-mode doom-themes flymake-eslint ivy catppuccin-theme use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm eglot company-quickhelp)))
+   '(combobulate quelpa-use-package flymake-css lsp-mode flymake-eslint ivy catppuccin-theme use-package typescript-mode smartparens prettier exec-path-from-shell eshell-vterm eglot company-quickhelp)))
 
