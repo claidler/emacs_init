@@ -30,13 +30,15 @@
 (setq backup-directory-alist `(("." . "~/.emacs.d/backups")))
 (setq auto-save-file-name-transforms `((".*" "~/.emacs.d/autosaves" t)))
 (setq create-lockfiles nil)
-
-;; UI
+(when (display-graphic-p)
+  (add-hook 'emacs-startup-hook 'toggle-frame-maximized))
 (setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
+
+;; UI
 (use-package which-key
   :ensure t
   :config
@@ -53,10 +55,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(help-key-binding ((t (:inherit fixed-pitch :background "grey19" :foreground "DeepSkyBlue1" :box (:line-width (-1 . -1) :color "grey35")))))
- '(highlight ((t (:background "#ff392e" :foreground "white")))))
+ '(highlight ((t (:background "#DA89A1" :foreground "white")))))
 
 ;; Treesitter
-
 ;; FIRST: git clone https://github.com/casouri/tree-sitter-module
 ;;        bash batch.sh
 ;; THEN : sudo cp dist/* /usr/local/lib
