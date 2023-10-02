@@ -97,7 +97,8 @@
 ;; GPT
 (use-package gptel
   :ensure t)
-(setq gptel-directives '((default . "You are a programmer. Do not be chatty. Give concise answers. Answer with just code if possible. Only use step by step if required for complex calculations - try to avoid it.")))
+(setq gptel-directives
+      '((programmer . "You are a programmer. Give concise answers. Answer with just code if possible. Only use step by step if required for complex calculations. Your output will be used in org mode - syntax highlight appropriately.")))
 (setq gptel-model "gpt-4")
 (defun gptel-open-and-clear ()
   (interactive)
@@ -162,6 +163,7 @@
  '(custom-safe-themes
    '("6ca663019600e8e5233bf501c014aa0ec96f94da44124ca7b06d3cf32d6c5e06" "f5f80dd6588e59cfc3ce2f11568ff8296717a938edd448a947f9823a4e282b66" "da75eceab6bea9298e04ce5b4b07349f8c02da305734f7c0c8c6af7b5eaa9738" default))
  '(global-font-lock-mode t)
+ '(gptel-default-mode 'org-mode)
  '(gptel-model "gpt-4")
  '(gptel-temperature 0.0)
  '(package-selected-packages
