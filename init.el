@@ -1,4 +1,6 @@
-;; init.el
+;;; init.el -- Emacs configuration
+;;; Commentary:
+;;; Code:
 
 ;; Package Management
 (require 'package)
@@ -23,8 +25,6 @@
 
 ;; Keys
 (global-set-key(kbd "<C-z>") nil)
-;; (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
-;; (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
 
 ;; System
 (setq backup-directory-alist `(("." . "~/.emacs.d/backups")))
@@ -37,6 +37,9 @@
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
+;;performance
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024)) ;; 1mb
 
 ;; UI
 (use-package which-key
@@ -71,16 +74,26 @@
 (load-theme 'catppuccin :no-confirm)
 
 ;; LSP
-(setq eglot-events-buffer-size 0)
+(use-package lsp-mode
+  :ensure t
+  :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l"
+        lsp-headerline-breadcrumb-mode nil
+	lsp-css-lint-unknown-properties nil)
+  :hook ((typescript-ts-mode . lsp-deferred)
+	 (tsx-ts-mode . lsp-deferred)
+	 (css-ts-mode . lsp-deferred)
+         (lsp-mode . lsp-enable-which-key-integration)))
 
 ;; Format
 (use-package prettier
   :ensure t)
-(use-package flymake-eslint
-  :ensure t)
-(setq flymake-eslint-executable-name "eslint_d")
 (use-package flycheck
-  :ensure t)
+  :ensure t
+  :init (global-flycheck-mode)
+  :config
+  (setq flycheck-javascript-eslint-executable "eslint_d"))
 
 ;; Editing
 (quelpa '(combobulate :fetcher github-ssh :repo "mickeynp/combobulate"))
@@ -96,19 +109,21 @@
 
 ;; GPT
 (use-package gptel
-  :ensure t)
-(setq gptel-directives
-      '((programmer . "You are a programmer. Give concise answers. Answer with just code if possible. Only use step by step if required for complex calculations. Your output will be used in org mode - syntax highlight appropriately.")))
-(setq gptel-model "gpt-4")
-(defun gptel-open-and-clear ()
-  (interactive)
-  (let ((gptel-buffer (call-interactively 'gptel)))
-    (with-current-buffer gptel-buffer
-      (delete-region (point-min) (point-max)))))
-
-(global-set-key (kbd "C-c l") 'gptel)
-(global-set-key (kbd "C-c L") 'gptel-open-and-clear)
-(global-set-key (kbd "C-c k") 'curser-code-replace)
+  :ensure t
+  :init
+  (setq gptel-directives
+        '((default . "You are a programmer. Give concise answers. Answer with just code if possible. Only use step by step if required for complex calculations. Your output will be used in org mode - syntax highlight appropriately.")
+          ))
+  (setq gptel-model "gpt-4")
+  :config
+  (defun gptel-open-and-clear ()
+    (interactive)
+    (let ((gptel-buffer (call-interactively 'gptel)))
+      (with-current-buffer gptel-buffer
+        (delete-region (point-min) (point-max)))))
+  :bind (("C-c g" . gptel)
+         ("C-c G" . gptel-open-and-clear)
+         ("C-c r" . curser-code-replace)))
 
 ;; git clone git@github.com:claidler/curser-el.git
 (load-file "~/.emacs.d/extensions/curser-el/curser.el")
@@ -121,22 +136,19 @@
   :quelpa (copilot :fetcher github
                    :repo "zerolfx/copilot.el"
                    :branch "main"
-                   :files ("dist" "*.el")
-		   ))
-(define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
-(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+                   :files ("dist" "*.el"))
+  :bind (:map copilot-completion-map
+              ("<tab>" . 'copilot-accept-completion)
+              ("TAB" . 'copilot-accept-completion))
+  :hook (prog-mode . copilot-mode))
 
-(add-hook 'prog-mode-hook 'copilot-mode)
 
 ;; Coding
 (defun setup-coding-mode ()
-  (eglot-ensure)
   (combobulate-mode)
   (prettier-mode))
 (defun setup-css-mode ()
-  (eglot-ensure)
-  (combobulate-mode)
-  (flycheck-mode))
+  (combobulate-mode))
 
 (add-hook 'tsx-ts-mode-hook 'setup-coding-mode)
 (add-hook 'typescript-ts-mode-hook 'setup-coding-mode)
