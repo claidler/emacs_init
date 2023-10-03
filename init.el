@@ -77,16 +77,14 @@
 (use-package lsp-mode
   :ensure t
   :commands (lsp lsp-deferred)
-  :init
-  (setq lsp-keymap-prefix "C-c l"
-        lsp-headerline-breadcrumb-mode nil
-        lsp-css-lint-unknown-properties nil)
   :hook ((typescript-ts-mode . lsp-deferred)
          (tsx-ts-mode . lsp-deferred)
          (css-ts-mode . lsp-deferred)
          (lsp-ts-mode . lsp-enable-which-key-integration)))
-
-
+(setq lsp-headerline-breadcrumb-enable nil)
+(setq lsp-css-lint-unknown-properties nil)
+(setq lsp-keymap-prefix "C-c l")
+ 
 ;; Format
 (use-package prettier
   :ensure t)
