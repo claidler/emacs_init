@@ -80,11 +80,12 @@
   :init
   (setq lsp-keymap-prefix "C-c l"
         lsp-headerline-breadcrumb-mode nil
-	lsp-css-lint-unknown-properties nil)
+        lsp-css-lint-unknown-properties nil)
   :hook ((typescript-ts-mode . lsp-deferred)
-	 (tsx-ts-mode . lsp-deferred)
-	 (css-ts-mode . lsp-deferred)
-         (lsp-mode . lsp-enable-which-key-integration)))
+         (tsx-ts-mode . lsp-deferred)
+         (css-ts-mode . lsp-deferred)
+         (lsp-ts-mode . lsp-enable-which-key-integration)))
+
 
 ;; Format
 (use-package prettier
