@@ -83,7 +83,7 @@
          (lsp-ts-mode . lsp-enable-which-key-integration)))
 (setq lsp-headerline-breadcrumb-enable nil)
 (setq lsp-css-lint-unknown-properties nil)
-(setq lsp-keymap-prefix "C-c l")
+(setq lsp-keymap-prefix "C-c m")
  
 ;; Format
 (use-package prettier
@@ -120,9 +120,9 @@
     (let ((gptel-buffer (call-interactively 'gptel)))
       (with-current-buffer gptel-buffer
         (delete-region (point-min) (point-max)))))
-  :bind (("C-c g" . gptel)
-         ("C-c G" . gptel-open-and-clear)
-         ("C-c r" . curser-code-replace)))
+  :bind (("C-c l" . gptel)
+         ("C-c L" . gptel-open-and-clear)
+         ("C-c k" . curser-code-replace)))
 
 ;; git clone git@github.com:claidler/curser-el.git
 (load-file "~/.emacs.d/extensions/curser-el/curser.el")
