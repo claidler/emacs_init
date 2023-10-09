@@ -23,6 +23,21 @@
 (use-package quelpa-use-package
   :ensure t)
 
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 6))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(setq package-enable-at-startup nil)
+
 ;; Keys
 (global-set-key(kbd "<C-z>") nil)
 
@@ -74,20 +89,35 @@
 (load-theme 'catppuccin :no-confirm)
 
 ;; LSP
-(use-package lsp-mode
+
+;; FIRST: pip3 install epc orjson sexpdata six paramiko rapidfuzz
+(use-package yasnippet
   :ensure t
-  :commands (lsp lsp-deferred)
-  :hook ((typescript-ts-mode . lsp-deferred)
-         (tsx-ts-mode . lsp-deferred)
-         (css-ts-mode . lsp-deferred)
-         (lsp-ts-mode . lsp-enable-which-key-integration)))
-(setq lsp-headerline-breadcrumb-enable nil)
-(setq lsp-css-lint-unknown-properties nil)
-(setq lsp-keymap-prefix "C-c m")
+  :config
+  (yas-global-mode 1))
+
+(use-package lsp-bridge
+  :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
+            :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+            :build (:not compile))
+  :init
+  (global-lsp-bridge-mode))
+
+(use-package copilot
+  :quelpa (copilot :fetcher github
+                   :repo "zerolfx/copilot.el"
+                   :branch "main"
+                   :files ("dist" "*.el"))
+  :bind (:map copilot-completion-map
+              ("<tab>" . 'copilot-accept-completion)
+              ("TAB" . 'copilot-accept-completion))
+  :hook (prog-mode . copilot-mode))
  
 ;; Format
 (use-package prettier
   :ensure t)
+(add-hook 'after-init-hook #'global-prettier-mode)
+
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode)
@@ -97,7 +127,8 @@
 ;; Editing
 (quelpa '(combobulate :fetcher github-ssh :repo "mickeynp/combobulate"))
 (setq combobulate-key-prefix "C-c o")
-
+(add-hook 'tsx-ts-mode-hook 'combobulate-mode)
+(add-hook 'typescript-ts-mode-hook 'combobulate-mode)
 
 ;; Navigation
 (fido-vertical-mode 1)
@@ -105,6 +136,9 @@
 ;; Terminal
 (use-package vterm
     :ensure t)
+
+;; Org
+(add-hook 'org-mode-hook 'visual-line-mode)
 
 ;; GPT
 (use-package gptel
@@ -131,39 +165,10 @@
 (use-package magit
   :ensure t)
 (quelpa '(code-review :fetcher github-ssh :repo "phelrine/code-review" :branch "fix/closql-update"))
-(use-package copilot
-  :quelpa (copilot :fetcher github
-                   :repo "zerolfx/copilot.el"
-                   :branch "main"
-                   :files ("dist" "*.el"))
-  :bind (:map copilot-completion-map
-              ("<tab>" . 'copilot-accept-completion)
-              ("TAB" . 'copilot-accept-completion))
-  :hook (prog-mode . copilot-mode))
 
-
-;; Coding
-(defun setup-coding-mode ()
-  (combobulate-mode)
-  (prettier-mode))
-(defun setup-css-mode ()
-  (combobulate-mode))
-
-(add-hook 'tsx-ts-mode-hook 'setup-coding-mode)
-(add-hook 'typescript-ts-mode-hook 'setup-coding-mode)
-(add-hook 'css-ts-mode-hook 'setup-css-mode)
-(add-hook 'eglot-managed-mode-hook (lambda ()
-                                     (cond
-                                      ((or (eq major-mode 'typescript-mode)
-                                           (eq major-mode 'tsx-ts-mode))
-                                       (flymake-eslint-enable))
-                                      ((eq major-mode 'css-ts-mode)
-                                       (flymake-mode -1)))))
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.css\\'" . css-ts-mode))
-
-
 
 (provide 'init)
 (custom-set-variables
